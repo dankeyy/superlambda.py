@@ -105,7 +105,7 @@ I will divide the `how`s into two parts.
 #### _how codecs_ 
 This question is pretty much already answered (I hope fullfillingly) over at the incdec repo. So to avoid repetition, please read the following- https://github.com/dankeyy/incdec.py#q-but-how-tf-do-you-do-text-replacements-i-thought-python-didnt-have-macros.
 
-#### how is _how multi line lambda_
+#### _how multi line lambda_
 So I actually took a while to think what would be the cleanest approach to this. And after thinking and playing with it for a while, i've come to the following possible transformation: \
 `"FunctionType(compile(<a def representation of the lambda>, '<preprocessed lambda>', 'single').co_consts[0], globals())\n"`.
 So let's start breaking it down. \
