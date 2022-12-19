@@ -117,16 +117,16 @@ simply because it does not exist yet.\
 The most sophisticated transformation we can do is text replacement.
 So what text replacement can we do?
 
-First, we need to way to dynamically create a function from a blob of text.
+First, we need a way to dynamically create a function from a blob of text.
 Luckily, python allows the creation of functions dynamically with [FunctionType](https://docs.python.org/3/library/types.html?highlight=functiontype#types.FunctionType).
 
 Small note is that in the the code itself I use `type(lambda:1)` instead of types FunctionType.
 The explaination for this is that built-in types in python are often also initializers. e.g `type(1)` is equivalent to `int` so that `type(1)('2')` would be equivilant to `int('2')`.
-In the same sense python, `type(lambda:"anything")` is equivilant to `types.FunctionType` (this is how roughly how it's implemented too, btw).
+In the same sense python, `type(lambda:"anything")` is equivilant to `types.FunctionType` (this is roughly how it's implemented too, btw).
 So we can take advantage of that and `type(lambda:1)` our way into a dynamic function ().
 Why I use it instead of FunctionType is simply because I prefer to avoid types import. Though it would be possible in expression form as `__import__('types').FunctionType`.
 
-Now to the fun part. The function initializer takes 5 arguments. 2 of them are relevant to us now, 1 may interest us later, the other 2 I don't care about for purposes of this post.
+Now to the fun part. The function initializer takes 5 arguments. 2 of them are relevant to us now, 1 may interest us later, the other 2 I don't care about for the purposes of this post.
 First two arguments are 2. globals, globals is simply the globals dict, env context for the function's use. \
 And more importantly- 1. The code object that contains the actual function logic (at this point you may want to assist the docs/ cpython source as to what is a code object/ or try to follow along).
 
@@ -134,7 +134,7 @@ So how do we make a code object for our function, again from a blob of text? \
 I believe there's a hard way, and an easy way. \
 The hard way is to go through python's CodeType and create the code from the ground up.\
 And believe me, that's pretty tedious. And I like easy ways so;
-What's the easy way? it is of course, steal. \
+What's the easy way? it is of course, steal.
 
 Maybe we can steal a function's code object? \
 First let's think, what happens when we `exec` a function definition?
@@ -200,5 +200,8 @@ This is very very dumb in this context, because say you're mapping a lambda over
 This sort of approach to indentation-based syntax is something that makes some sense for general statement-like cpython syntax, but not so much for location-flexible expressions. \
 It makes the implementation pretty fragile. \
 I mean, if you wanna break it, go ahead, it's very easy to do so, but I suggest playing nice.
+
+### Won't number lines get messed up? as you replace multiple lines with just one line?
+Aha, very observant of you. It's true, when replacing multiple lines of our lambda declaration with one line of our transformed expression, some lines would be missing, which could and will cause wrong number lines to appear in tracebacks. That is why for every line in the lambda body, one newline character is added to our lines buffer.
 
 Well that's all for now, hava nice day.
