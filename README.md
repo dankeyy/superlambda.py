@@ -2,8 +2,8 @@
 Eventually I'll make it a proper lang.
 
 This is supercharged multi-line capable lambda statements for snake lang. \
-Small digression - this implementation is pretty hand-wavey, naive, and frankly stupid. \
-[Being lazy as I am, I don't write any special voodoo parser, literally looping over text. more on that later]
+Just beware this implementation is pretty hand-wavey, naive, and frankly stupid. \
+Being lazy as I am, I don't write any special voodoo parser, literally looping over text, but more on that later.\
 Created merely for entertainment purposes, don't try this at work (home may be ok).\
 Usage is the same as incdec, see sub section [how codecs](#how-codecs).
 
