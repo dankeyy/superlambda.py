@@ -2,7 +2,7 @@
 
 f = lambda n:
         a, b = 0, 1
-        for i in range(0, n):
+        for i in range(n):
             a, b = b, a + b
         return a
 
@@ -12,7 +12,7 @@ g = lambda:
 
 h = lambda: return 3
 
-k = lambda: yield from (4,5,6)
+k = lambda: yield from "gottem"
 
 m = λ n:
     if n == 1:
@@ -27,7 +27,6 @@ maptest = map(lambda x:
                   return x + 1
               , (6,7,8,9))
 
-raise ValueError
 
 print(f(10))
 print(*g())
