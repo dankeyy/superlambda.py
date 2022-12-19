@@ -6,24 +6,25 @@ Small digression - this implementation is pretty hand-wavey, naive, and frankly 
 [Being lazy as I am, I don't write any special voodoo parser, literally looping over text. more on that later]
 Created merely for entertainment purposes, don't try this at work (home may be ok).
 
-As always, the why, the what, the how.
+As always;
+# the why, the what, the how
 
 ### the why
-So at first I was hesitant whether or not to take a shot at this, because well I've already dove nose deep into codecs when working on https://github.com/dankeyy/incdec.py and didn't wanna get repetetive.
+So at first I was hesitant whether or not to take a shot at this, because well I've already dove nose deep into codecs when working on (incdec)[https://github.com/dankeyy/incdec.py] and didn't wanna get repetetive.
 [And this kinda stuff is pretty codecs centered, as it is definetly not syntactically correct.]
 
-But I've come to think multi line lambdas are a pretty cool worthy goal. \
-Besides, I figured the needed transformation from a statement-like multi-line lambda to a valid py expression can be interesting to explore. \
-Also it seems to disturb a lot of people that python doesn't have those. And I am a man of the people, after all. \
+But I've come to think multi line lambdas are a pretty cool worthy goal.\
+Besides, I think the needed transformation from a statement-like multi-line lambda to a valid py expression is pretty interesting and educating.\
+Also, it seems to disturb a lot of people that python doesn't have those. And I am a man of the people, after all.
 
-So this is codecs abuse, the sequel. \
+So this is codecs abuse, the sequel.
 
 ### the what
 Presenting, multi line lambdas:
 
 ``` python
 # coding: superlambda
-# with love, to `def`-haters
+# with love, to `def` haters
 
 f = lambda n:
         a, b = 0, 1
@@ -47,15 +48,16 @@ And now here's something cute, with regular lambdas you can do `lambda: (yield 1
 ``` python
 f = lambda: yield from "gottem"
 ```
-[BTW this doesn't require a fancy transformation, parenthesis are just implicitly put around it lol.]
+[BTW this doesn't require a fancy transformation, parenthesis are just implicitly put around it lol]\
 Speaking of weird special casing, ever wondered why you can't uselessly put a return in a lambda expression?
 Well now you can.
 
 ``` python
 f = lambda: return 1337
-print(f) # will trustly not raise a lame SyntaxError and print 1337
+print(f()) # will trustly not raise a lame SyntaxError and print 1337
 ```
-You can also use it in a a function call, for instance let's see a map;
+This again is done not with the special transformation, but just yeeting out the `return` from the code. Why? because I can.\
+You can also use it in a a function call, for instance, let's see a map
 
 ``` python
 maptest = map(lambda x:
@@ -66,7 +68,7 @@ maptest = map(lambda x:
                   return x + 1
               , (6,7,8,9))
 ```
-Will print
+Executing by printing `list(maptest)` will ouput
 
 ``` python
 apple
@@ -79,6 +81,8 @@ Do note the small caveat that we needed to put the comma on the line below the e
 This may be annoying, but in my defense;
 1. I parse like a lazy monkey.
 2. This shit is pretty ambiguous, how would you know if you're returning a tuple of stuff or the rightmost element is just another argument to the function (map in this case). iirc that was guido's main argument against multi line lambdas.
+
+More on that at the end of the post.
 
 Anyways, now for the cherry on top;
 
@@ -103,32 +107,32 @@ The second how is _how multi line lambda_. \
 So I actually took a while to think what would be the cleanest approach to this. And after thinking and playing with it for a while, i've come to the following possible transformation: \
 `"FunctionType(compile(<a def representation of the lambda>, '<preprocessed lambda>', 'single').co_consts[0], globals())\n"`.
 So let's start breaking it down. \
-[In favour of anyone not familiar with code obj stuff, here's a some mildly long tedious blob of text on how to mess with this sort of stuff, feel free to skip ahead.] \
+[In favour of anyone not familiar with code obj stuff, here's a some mildly long tedious blob of text on how to mess with this sort of stuff, feel free to skip ahead.]
 
 Remember, at this stage of compile/run-time (preprocessed time? encoding time? call it how you wish), all we have are strings and bytes. \
 There are no live functions. We cannot create a function aside and pass it to the mapping or assignment (or whoever whatever requires it), \
-simply because it does not exist yet. \
+simply because it does not exist yet.\
 The most sophisticated transformation we can do is text replacement.
 So what text replacement can we do?
 
 First, we need to way to dynamically create a function from a blob of text.
 Luckily, python allows the creation of functions dynamically with [FunctionType](https://docs.python.org/3/library/types.html?highlight=functiontype#types.FunctionType).
 
-Small note is thati in the the code itself I use `type(lambda:1)` instead of types FunctionType.
+Small note is that in the the code itself I use `type(lambda:1)` instead of types FunctionType.
 The explaination for this is that built-in types in python are often also initializers. e.g `type(1)` is equivalent to `int` so that `type(1)('2')` would be equivilant to `int('2')`.
 In the same sense python, `type(lambda:"anything")` is equivilant to `types.FunctionType` (this is how roughly how it's implemented too, btw).
 So we can take advantage of that and `type(lambda:1)` our way into a dynamic function ().
 Why I use it instead of FunctionType is simply because I prefer to avoid types import. Though it would be possible in expression form as `__import__('types').FunctionType`.
 
 Now to the fun part. The function initializer takes 5 arguments. 2 of them are relevant to us now, 1 may interest us later, the other 2 I don't care about for purposes of this post.
-First two arguments are 1. globals, globals is simply the globals dict, env context for the function's use. \
-And 2. the code object that contains the actual function logic (at this point you may want to assist the docs/ cpython source as to what is a code object/ or try to follow along).
+First two arguments are 2. globals, globals is simply the globals dict, env context for the function's use. \
+And more importantly- 1. The code object that contains the actual function logic (at this point you may want to assist the docs/ cpython source as to what is a code object/ or try to follow along).
 
 So how do we make a code object for our function, again from a blob of text? \
 I believe there's a hard way, and an easy way. \
-The hard way is to go through python's CodeType and create the code from the ground up. 
+The hard way is to go through python's CodeType and create the code from the ground up.\
 And believe me, that's pretty tedious. And I like easy ways so;
-What's the easy way? of course, steal. \
+What's the easy way? it is of course, steal. \
 
 Maybe we can steal a function's code object? \
 First let's think, what happens when we `exec` a function definition?
@@ -180,19 +184,19 @@ And indeed it works.
 The actual transformation is just like that, with the small caveat of needing to convert the header of the lambda decl to a def which is left for the reader to see it in the source code.
 
 # problems & nitpicks
-## You regex source code?? don't you know how bad it is??
-Why yes, yes I do.
-![gigadonkey](https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.reddit.com%2Fr%2FTIHI%2Fcomments%2Foyhroc%2Fthanks_i_hate_chad_donkey%2F&psig=AOvVaw1UeWtkkwdfgC955Mne_S2M&ust=1671557137138000&source=images&cd=vfe&ved=0CBAQjRxqFwoTCMjltt2ZhvwCFQAAAAAdAAAAABAD)
+### You regex source code?? don't you know how bad it is??
+[Why yes, yes I do.](https://i.redd.it/ior3kee8mjf71.jpg)
 
-## how do you not fup indentation?
+
+### How do you not fup indentation?
 It actually is tricky.
 See if you want to support functions with no explicit return, and/or just yields (not necessarily on last line ofc). You cannot rely on the `return` to stop parsing the function.
 So how it's done is by the general off side rule, just marginally more naive/ stupider. Every line should start with the indentation of the first line after the lambda header.
 Once reached a line that opens with indentation lesser than that set indentation, it counts as the end of the lambda function.
 
-This is very very dumb in this context, because say you're mapping a lambda over some iterable, in the line below the lambda decl, you have to indent a bit further back than the lambda contents. \
+This is very very dumb in this context, because say you're mapping a lambda over some iterable, in the line below the lambda decl, you have to indent a bit further back than the lambda contents (even though inside parens every indentation should be allowed!). \
 This sort of approach to indentation-based syntax is something that makes some sense for general statement-like cpython syntax, but not so much for location-flexible expressions. \
 It makes the implementation pretty fragile. \
-I mean, if you wanna break it, go ahead, it's very easy to do so, but I suggest playing nice. \
+I mean, if you wanna break it, go ahead, it's very easy to do so, but I suggest playing nice.
 
 Well that's all for now, hava nice day.
