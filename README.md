@@ -4,13 +4,14 @@ Eventually I'll make it a proper lang.
 This is supercharged multi-line capable lambda statements for snake lang. \
 Small digression - this implementation is pretty hand-wavey, naive, and frankly stupid. \
 [Being lazy as I am, I don't write any special voodoo parser, literally looping over text. more on that later]
-Created merely for entertainment purposes, don't try this at work (home may be ok).
+Created merely for entertainment purposes, don't try this at work (home may be ok).\
+Usage is the same as incdec, see section [how codecs](#how-codecs)
 
 As always;
 # the why, the what, the how
 
 ### the why
-So at first I was hesitant whether or not to take a shot at this, because well I've already dove nose deep into codecs when working on (incdec)[https://github.com/dankeyy/incdec.py] and didn't wanna get repetetive.
+So at first I was hesitant whether or not to take a shot at this, because well I've already dove nose deep into codecs when working on [incdec](https://github.com/dankeyy/incdec.py) and didn't wanna get repetetive.
 [And this kinda stuff is pretty codecs centered, as it is definetly not syntactically correct.]
 
 But I've come to think multi line lambdas are a pretty cool worthy goal.\
@@ -101,9 +102,10 @@ Now enough code, let's see how;
 ### the how
 I will divide the `how`s into two parts.
 
-The first how is _how codecs_ - which is already answered (I hope fullfillingly) over at the incdec repo. So to avoid repetition, please read the following- https://github.com/dankeyy/incdec.py#q-but-how-tf-do-you-do-text-replacements-i-thought-python-didnt-have-macros.
+#### _how codecs_ 
+This question is pretty much already answered (I hope fullfillingly) over at the incdec repo. So to avoid repetition, please read the following- https://github.com/dankeyy/incdec.py#q-but-how-tf-do-you-do-text-replacements-i-thought-python-didnt-have-macros.
 
-The second how is _how multi line lambda_. \
+#### how is _how multi line lambda_
 So I actually took a while to think what would be the cleanest approach to this. And after thinking and playing with it for a while, i've come to the following possible transformation: \
 `"FunctionType(compile(<a def representation of the lambda>, '<preprocessed lambda>', 'single').co_consts[0], globals())\n"`.
 So let's start breaking it down. \
